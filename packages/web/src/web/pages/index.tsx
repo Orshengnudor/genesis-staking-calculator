@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { hc } from "hono/client";
-import type { AppType } from "../../api/index";
 
-const client = hc<AppType>(window.location.origin);
+
+
+const REAL_API = "https://staking.real.finance/api/trpc";
 
 // Campaign constants
 const CAMPAIGN_START = new Date("2026-05-14T10:00:00Z").getTime(); // activation_epoch from API
