@@ -1,7 +1,12 @@
 {
   "buildCommand": "cd packages/web && bunx vite build",
   "outputDirectory": "packages/web/dist",
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "rewrites": [
-    { "source": "/((?!api).*)", "destination": "/index.html" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
