@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 
-
-
 const REAL_API = "https://staking.real.finance/api/trpc";
 
 // Campaign constants
@@ -81,11 +79,14 @@ export default function Index() {
     async function fetchPool() {
       setPoolLoading(true);
       try {
-        const res = await client.api["staking"]["info"].$get();
-        if (res.ok) {
-          const data = await res.json() as any;
-          setPoolInfo(data.info);
-          setPriceInfo(data.price);
+        const [infoRes, priceRes] = await Promise.all([
+          fetch(`${REAL_API}/staking.info`),
+          fetch(`${REAL_API}/prices.snapshot`),
+        ]);
+        if (infoRes.ok && priceRes.ok) {
+          const [infoData, priceData] = await Promise.all([infoRes.json(), priceRes.json()]);
+          setPoolInfo(infoData.result?.data?.json);
+          setPriceInfo(priceData.result?.data?.json);
         }
       } catch {}
       setPoolLoading(false);
@@ -105,14 +106,15 @@ export default function Index() {
     setShowResult(false);
 
     try {
-      const res = await client.api["staking"]["wallet"][":address"].$get({ param: { address: addr } });
+      const input = encodeURIComponent(JSON.stringify({ json: { wallet: addr } }));
+      const res = await fetch(`${REAL_API}/staking.user?input=${input}`);
       const data = await res.json() as any;
       if (!res.ok || data.error) {
-        setError(data.error ?? "Wallet not found or has no stake.");
+        setError(data.error?.json?.message ?? "Wallet not found or has no stake.");
         setLoading(false);
         return;
       }
-      setWalletData(data.wallet);
+      setWalletData(data.result?.data?.json);
       setTimeout(() => {
         setShowResult(true);
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
@@ -217,20 +219,20 @@ export default function Index() {
         <div style={{
           background: "rgba(255,255,255,0.03)",
           border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: 14, padding: "20px 28px",
-          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-          gap: 0, marginBottom: 32,
+          borderRadius: 14, padding: "20px 12px",
+          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+          gap: 12, marginBottom: 32,
         }}>
           {[
-            { label: "Total Staked", value: poolLoading ? "—" : formatNum(totalStaked, 0) + " $ASSET", sub: poolLoading ? "" : `≈ $${formatNum(totalStaked * price)}` },
+            { label: "Total Staked", value: poolLoading ? "—" : formatNum(totalStaked, 0) + " $ASSET", sub: poolLoading ? "" : `≈ ${formatNum(totalStaked * price)}` },
             { label: "Stakers", value: poolLoading ? "—" : poolInfo?.staker_count.toString() ?? "—", sub: "wallets active" },
             { label: "Reward Pool", value: "$50,000", sub: "USDC fixed" },
-            { label: "$ASSET Price", value: poolLoading ? "—" : `$${parseFloat(priceInfo?.avg_price_usd ?? "0").toFixed(4)}`, sub: "avg across exchanges" },
+            { label: "$ASSET Price", value: poolLoading ? "—" : `${parseFloat(priceInfo?.avg_price_usd ?? "0").toFixed(4)}`, sub: "avg across exchanges" },
             { label: "Days Left", value: days.toString(), sub: "ends Aug 12, 2026" },
-          ].map((stat, i, arr) => (
+          ].map((stat) => (
             <div key={stat.label} style={{
-              textAlign: "center", padding: "8px 16px",
-              borderRight: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.07)" : "none",
+              textAlign: "center", padding: "8px 8px",
+              borderRight: "none",
             }}>
               <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 6 }}>
                 {stat.label}
@@ -355,17 +357,17 @@ export default function Index() {
 
               {/* Position Details */}
               <div style={{
-                display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 0,
+                display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 12,
               }}>
                 {[
                   { label: "Your Stake", value: formatNum(walletStaked, 2) + " $ASSET" },
-                  { label: "Stake Value", value: `$${formatNum(stakeValueUsd, 2)}` },
+                  { label: "Stake Value", value: `${formatNum(stakeValueUsd, 2)}` },
                   { label: "Pool Share", value: parseFloat(walletData.share_of_pool_pct).toFixed(4) + "%" },
                   { label: "Weight Share", value: shareOfWeight.toFixed(6) + "%" },
-                ].map((item, i, arr) => (
+                ].map((item) => (
                   <div key={item.label} style={{
-                    padding: "0 20px", textAlign: "center",
-                    borderRight: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.07)" : "none",
+                    padding: "0 12px", textAlign: "center",
+                    borderRight: "none",
                   }}>
                     <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 6 }}>
                       {item.label}
