@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const REAL_API = "/api";
+const PROXY = "/api/proxy";
 
 // Campaign constants
 const CAMPAIGN_START = new Date("2026-05-14T10:00:00Z").getTime(); // activation_epoch from API
@@ -80,8 +80,8 @@ export default function Index() {
       setPoolLoading(true);
       try {
         const [infoRes, priceRes] = await Promise.all([
-          fetch(`${REAL_API}/staking.info`),
-          fetch(`${REAL_API}/prices.snapshot`),
+          fetch(`${PROXY}?path=staking.info`),
+          fetch(`${PROXY}?path=prices.snapshot`),
         ]);
         if (infoRes.ok && priceRes.ok) {
           const [infoData, priceData] = await Promise.all([infoRes.json(), priceRes.json()]);
@@ -107,7 +107,7 @@ export default function Index() {
 
     try {
       const input = encodeURIComponent(JSON.stringify({ json: { wallet: addr } }));
-      const res = await fetch(`${REAL_API}/staking.user?input=${input}`);
+      const res = await fetch(`${PROXY}?path=staking.user&input=${input}`);
       const data = await res.json() as any;
       if (!res.ok || data.error) {
         setError(data.error?.json?.message ?? "Wallet not found or has no stake.");
