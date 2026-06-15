@@ -187,7 +187,7 @@ export default function Index() {
         </div>
       </header>
 
-      <main style={{ maxWidth: 1080, margin: "0 auto", padding: "48px 24px 80px" }}>
+      <main style={{ maxWidth: 1080, margin: "0 auto", padding: "48px clamp(16px, 4vw, 24px) 80px" }}>
 
         {/* Hero */}
         <div style={{ textAlign: "center", marginBottom: 48 }}>
@@ -249,13 +249,13 @@ export default function Index() {
         <div style={{
           background: "#111420",
           border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: 18, padding: "36px 36px 32px",
+          borderRadius: 18, padding: "clamp(20px, 5vw, 36px)",
           marginBottom: 28,
         }}>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>
             Your Wallet Address
           </div>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexDirection: "column" }}>
             <input
               type="text"
               placeholder="0x..."
@@ -263,7 +263,7 @@ export default function Index() {
               onChange={(e) => { setAddress(e.target.value); setError(null); }}
               onKeyDown={(e) => e.key === "Enter" && handleCheck()}
               style={{
-                flex: 1, minWidth: 260,
+                flex: 1, minWidth: 0, width: "100%",
                 background: "rgba(255,255,255,0.04)",
                 border: `1px solid ${error ? "rgba(242,64,80,0.5)" : address.length > 0 ? "rgba(32,80,242,0.5)" : "rgba(255,255,255,0.1)"}`,
                 borderRadius: 8, padding: "14px 18px",
@@ -283,7 +283,7 @@ export default function Index() {
                 fontSize: 13, fontWeight: 600,
                 letterSpacing: "0.05em", textTransform: "uppercase",
                 cursor: loading || !address ? "not-allowed" : "pointer",
-                minWidth: 130,
+                minWidth: 0, width: "100%",
                 transition: "background 0.2s",
               }}
             >
