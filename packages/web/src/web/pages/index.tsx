@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const REAL_API = "https://staking.real.finance/api/trpc";
+const REAL_API = "/api";
 
 // Campaign constants
 const CAMPAIGN_START = new Date("2026-05-14T10:00:00Z").getTime(); // activation_epoch from API
